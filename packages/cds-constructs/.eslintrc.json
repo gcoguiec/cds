@@ -1,0 +1,51 @@
+{
+  "root": true,
+  "plugins": ["simple-import-sort"],
+  "extends": ["@gcoguiec/eslint-config-typescript", "prettier"],
+  "rules": {
+    "no-new": "off",
+    "simple-import-sort/imports": [
+      "error",
+      {
+        "groups": [
+          [
+            "^(assert|assert/strict|async_hooks|buffer|child_process|cluster|console|constants|crypto|dgram|diagnostics_channel|dns|dns/promises|domain|events|fs|fs/promises|http|http2|https|inspector|inspector/promises|module|net|os|path|path/posix|path/win32|perf_hooks|process|punycode|querystring|readline|readline/promises|repl|stream|stream/consumers|stream/promises|stream/web|string_decoder|sys|timers|timers/promises|tls|trace_events|tty|url|util|util/types|v8|vm|worker_threads|zlib)(/.*|$)",
+            "^node:(/.*|$)",
+            "^@?\\w"
+          ],
+          [
+            "^\\.\\.(?!/?$)",
+            "^\\.\\./?$",
+            "^\\./(?=.*/)(?!/?$)",
+            "^\\.(?!/?$)",
+            "^\\./?$",
+            "^.+\\.json$"
+          ]
+        ]
+      }
+    ],
+    "simple-import-sort/exports": "error",
+    "@typescript-eslint/no-unsafe-assignment": "off",
+    "@typescript-eslint/no-unsafe-call": "off",
+    "@typescript-eslint/no-unsafe-member-access": "off",
+    "@typescript-eslint/no-unsafe-argument": "off"
+  },
+  "overrides": [
+    {
+      "files": ["**/*.spec.?(mj|j|mt|t)s"],
+      "env": {
+        "jest": true
+      },
+      "plugins": ["jest"],
+      "rules": {
+        "no-restricted-globals": [
+          "error",
+          "fdescribe",
+          "ddescribe",
+          "fit",
+          "iit"
+        ]
+      }
+    }
+  ]
+}

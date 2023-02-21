@@ -1,0 +1,41 @@
+{
+  "version": "0.1",
+  "language": "en",
+  "ignorePaths": [
+    "**/coverage/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/**/LICENSE.md",
+    "**/*.{json,snap}",
+    "examples/**",
+    ".cspell.json"
+  ],
+  "dictionaries": [
+    "typescript",
+    "softwareTerms",
+    "node",
+    "en_US",
+    "npm",
+    "misc",
+    "filetypes"
+  ],
+  "ignoreRegExpList": [
+    "/```[\\w\\W]*?```/",
+    "/~~~[\\w\\W]*?~~~/",
+    "/``[\\w\\W]*?``/",
+    "/`[^`]*`/",
+    "/TS[^\\s]+/",
+    "\\(#.+?\\)"
+  ],
+  "words": ["gcoguiec", "Guillaume", "Coguiec"],
+  "overrides": [
+    {
+      "filename": "**/*.{ts,js,cjs,mjs}",
+      "ignoreRegExpList": ["/@[a-z]+/", "/#(end)?region/"],
+      "includeRegExpList": [
+        "/\\/\\*[\\s\\S]*?\\*\\/|([^\\\\:]|^)\\/\\/.*$/",
+        "/(\\/\\/[^\\n\\r]*[\\n\\r]+)/"
+      ]
+    }
+  ]
+}
