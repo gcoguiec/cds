@@ -5,12 +5,12 @@ import { Testing } from 'cdktf';
 import { CDSPrivateS3Bucket } from './private-s3-bucket';
 
 describe('CDSPrivateS3Bucket', () => {
-  describe('when no configuration is provided', () => {
-    let synthetized: string;
+  let synthetized: string;
 
+  describe('when no configuration is provided', () => {
     beforeAll(() => {
       synthetized = Testing.synthScope(scope => {
-        new CDSPrivateS3Bucket(scope, 'private', { bucket: 'test' });
+        new CDSPrivateS3Bucket(scope, 'private', {});
       });
     });
 
@@ -22,7 +22,7 @@ describe('CDSPrivateS3Bucket', () => {
       });
     });
 
-    it('creates buckets server-side encryption with an AES256 algorithm', () => {
+    it('creates bucket with server-side encryption set to AES256 by default', () => {
       expect(synthetized).toHaveResourceWithProperties(
         S3BucketServerSideEncryptionConfigurationA,
         {
