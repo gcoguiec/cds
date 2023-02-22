@@ -44,7 +44,6 @@
     "@typescript-eslint/parser": "^5.53.0",
     "cdktf": "^0.15.5",
     "constructs": "^10.1.255",
-    "cspell": "^6.26.3",
     "esbuild": "^0.17.10",
     "eslint": "^8.34.0",
     "eslint-config-prettier": "^8.6.0",

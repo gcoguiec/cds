@@ -1,5 +1,4 @@
 {
   "*.{ts,js,cjs,mjs,cts,mts,json,md}": ["prettier --write"],
-  "*.{ts,js,cjs,mjs,cts,mts}": ["eslint --fix"],
-  "*.{scss,css}": ["stylelint --fix"]
+  "*.{ts,js,cjs,mjs,cts,mts}": ["pnpm -r lint-fix"]
 }

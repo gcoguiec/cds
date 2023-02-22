@@ -10,6 +10,7 @@
     "@gcoguiec/commitlint-config": "^1.0.2",
     "commitlint": "^17.4.4",
     "husky": "^8.0.3",
-    "lint-staged": "^13.1.2"
+    "lint-staged": "^13.1.2",
+    "cspell": "^6.26.3"
   }
 }

@@ -25,8 +25,8 @@ jobs:
           cache: pnpm
       - name: Install dependencies.
         run: pnpm install --frozen-lockfile
-      - name: Execute audit-ci scanner.
-        run: npx audit-ci
+      - name: Execute security scanner.
+        run: pnpm audit -P
       - name: Check code format.
         run: just fmt-check
       - name: Check types.
