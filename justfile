@@ -13,14 +13,20 @@ fmt:
 fmt-check:
   @just prettier --check
 
+lint:
+  @pnpm -r lint
+
+typecheck:
+  @pnpm -r typecheck
+
 husky-precommit:
   pnpm lint-staged
 
 husky-prepush:
   @just fmt-check
   @just spellcheck
-  @pnpm -r typecheck
-  @pnpm -r lint
+  @just typecheck
+  @just lint
 
 publish:
   pnpm publish -r --access public

@@ -1,0 +1,37 @@
+name: CI
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lint:
+    name: Run scanners, linters and spellchecking.
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source.
+        uses: actions/checkout@v3
+      - name: Setup pnpm.
+        uses: pnpm/action-setup@v2
+      - name: Setup just.
+        uses: extractions/setup-just@v1
+      - name: Setup node.
+        uses: actions/setup-node@v3
+        with:
+          node-version: 19
+          cache: pnpm
+      - name: Install dependencies.
+        run: pnpm install --frozen-lockfile
+      - name: Execute audit-ci scanner.
+        run: npx audit-ci
+      - name: Check code format.
+        run: just fmt-check
+      - name: Check types.
+        run: just typecheck
+      - name: Lint code-base.
+        run: just lint
+      - name: Spellcheck code-base.
+        run: just spellcheck
