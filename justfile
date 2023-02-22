@@ -33,3 +33,6 @@ publish:
 
 spellcheck:
   pnpm cspell --config=.cspell.json "**/*.{md,js,cjs,mjs,ts,cts,mts}"
+
+test:
+  pnpm -r test
