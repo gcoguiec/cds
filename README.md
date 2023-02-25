@@ -1,3 +1,3 @@
 # ☁️ CDS (Cloud Development Suite)
 
-A bunch of reusable CDK constructs and stacks, still heavily **under development**.
+A bunch of reusable CDK constructs and stacks, still **under development**.

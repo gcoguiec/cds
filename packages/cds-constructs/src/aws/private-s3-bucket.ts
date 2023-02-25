@@ -44,7 +44,10 @@ export interface CDSPrivateS3LoggingConfig extends TerraformMetaArguments {
 }
 
 /**
- * Creates a private S3 bucket with good defaults.
+ * Creates a private S3 bucket.
+ *
+ * This resource blocks public access and log all accesses in a secondary
+ * bucket by default.
  */
 export class CDSPrivateS3Bucket extends Construct {
   constructor(
@@ -189,6 +192,8 @@ export class CDSPrivateS3Bucket extends Construct {
         {
           ...(sseAlgorithm === SSEAlgorithm.KMS
             ? {
+                // Bucket key is enabled by default when using KMS.
+                // see: https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-key.html
                 bucketKeyEnabled: bucketKeyEnabled ?? true
               }
             : {}),
