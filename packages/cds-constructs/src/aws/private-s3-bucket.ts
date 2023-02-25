@@ -7,9 +7,11 @@ import { S3BucketPublicAccessBlock } from '@cdktf/provider-aws/lib/s3-bucket-pub
 import { S3BucketServerSideEncryptionConfigurationA } from '@cdktf/provider-aws/lib/s3-bucket-server-side-encryption-configuration';
 import { S3BucketVersioningA } from '@cdktf/provider-aws/lib/s3-bucket-versioning';
 import type { TerraformMetaArguments } from 'cdktf';
+import { TerraformOutput } from 'cdktf';
 import { Construct } from 'constructs';
 
-import { SSEAlgorithm } from '../common';
+import { SSEAlgorithm } from '../aws';
+import { checkS3BucketName } from '../utils/validation';
 
 export type CSDS3PrivateBucketLogConfig = Pick<
   S3BucketLoggingAConfig,
@@ -24,6 +26,7 @@ export type CDSPrivateS3BucketConfig = Pick<
   readonly kmsMasterKeyId?: string;
   readonly bucketKeyEnabled?: boolean;
   readonly log?: CSDS3PrivateBucketLogConfig;
+  readonly versioned?: boolean;
 };
 
 export interface CDSPrivateS3ServerSideEncryptionConfig
@@ -51,7 +54,14 @@ export class CDSPrivateS3Bucket extends Construct {
   ) {
     super(scope, name);
 
-    const { provider, log } = config;
+    const { provider, log, bucket } = config;
+
+    if (bucket && !checkS3BucketName(bucket)) {
+      throw new Error(
+        `${CDSPrivateS3Bucket.name}: '${bucket}' bucket name is invalid.`
+      );
+    }
+
     const s3Bucket = this.createBucket(config);
     const logBucket = this.createLogBucket(config);
 
@@ -60,6 +70,13 @@ export class CDSPrivateS3Bucket extends Construct {
       targetBucket: logBucket.id,
       provider,
       targetPrefix: log?.targetPrefix
+    });
+
+    new TerraformOutput(this, 'bucket_name', {
+      value: s3Bucket.bucket
+    });
+    new TerraformOutput(this, 'log_bucket_name', {
+      value: logBucket.bucket
     });
   }
 
@@ -70,7 +87,8 @@ export class CDSPrivateS3Bucket extends Construct {
       provider,
       sseAlgorithm,
       kmsMasterKeyId,
-      bucketKeyEnabled
+      bucketKeyEnabled,
+      versioned
     } = config;
 
     const resource = new S3Bucket(this, 'bucket', {
@@ -81,6 +99,7 @@ export class CDSPrivateS3Bucket extends Construct {
 
     new S3BucketAcl(this, 'acl', {
       bucket: resource.id,
+      provider,
       acl: 'private'
     });
 
@@ -95,18 +114,21 @@ export class CDSPrivateS3Bucket extends Construct {
 
     this.createServiceSideEncryption('sse_encryption', {
       bucket: resource.id,
+      provider,
       sseAlgorithm,
       kmsMasterKeyId,
       bucketKeyEnabled
     });
 
-    new S3BucketVersioningA(this, 'versioning', {
-      bucket: resource.id,
-      provider,
-      versioningConfiguration: {
-        status: 'Enabled'
-      }
-    });
+    if (versioned) {
+      new S3BucketVersioningA(this, 'versioning', {
+        bucket: resource.id,
+        provider,
+        versioningConfiguration: {
+          status: 'Enabled'
+        }
+      });
+    }
 
     return resource;
   }
@@ -122,13 +144,14 @@ export class CDSPrivateS3Bucket extends Construct {
     } = config;
 
     const resource = new S3Bucket(this, 'log_bucket', {
-      bucket,
+      bucket: bucket ? `${bucket}-logs` : undefined,
       tags,
       provider
     });
 
     new S3BucketAcl(this, 'log_acl', {
       bucket: resource.id,
+      provider,
       acl: 'log-delivery-write'
     });
 
@@ -143,6 +166,7 @@ export class CDSPrivateS3Bucket extends Construct {
 
     this.createServiceSideEncryption('log_sse_encryption', {
       bucket: resource.id,
+      provider,
       sseAlgorithm,
       kmsMasterKeyId,
       bucketKeyEnabled
@@ -163,8 +187,11 @@ export class CDSPrivateS3Bucket extends Construct {
       provider,
       rule: [
         {
-          bucketKeyEnabled:
-            bucketKeyEnabled ?? sseAlgorithm === SSEAlgorithm.KMS,
+          ...(sseAlgorithm === SSEAlgorithm.KMS
+            ? {
+                bucketKeyEnabled: bucketKeyEnabled ?? true
+              }
+            : {}),
           applyServerSideEncryptionByDefault: {
             sseAlgorithm: sseAlgorithm ?? SSEAlgorithm.AES,
             ...(sseAlgorithm === SSEAlgorithm.KMS ? { kmsMasterKeyId } : {})

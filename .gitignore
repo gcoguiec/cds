@@ -14,6 +14,12 @@ node_modules
 # Ignore eslint cache.
 .eslintcache
 
+# Ignore tsc build info files.
+*.tsbuildinfo
+
+# Ignore coverage folder.
+coverage
+
 # Ignore other package manager lock files.
 yarn.lock
 package-lock.json
@@ -24,6 +30,3 @@ junit.xml
 
 # Ignore build artifacts
 dist
-
-# Ignore examples folder
-examples

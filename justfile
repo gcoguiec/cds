@@ -16,6 +16,9 @@ fmt-check:
 lint:
   @pnpm -r lint
 
+lint-fix:
+  @pnpm -r lint:fix
+
 typecheck:
   @pnpm -r typecheck
 
