@@ -6,12 +6,7 @@ import pkg from './package.json' assert { type: 'json' };
 
 const external = [
   ...Object.keys(pkg.peerDependencies),
-  '@cdktf/provider-aws/lib/s3-bucket',
-  '@cdktf/provider-aws/lib/s3-bucket-acl',
-  '@cdktf/provider-aws/lib/s3-bucket-logging',
-  '@cdktf/provider-aws/lib/s3-bucket-public-access-block',
-  '@cdktf/provider-aws/lib/s3-bucket-server-side-encryption-configuration',
-  '@cdktf/provider-aws/lib/s3-bucket-versioning'
+  /^@cdktf\/provider-aws\/.*/
 ];
 
 export default [
