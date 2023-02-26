@@ -18,7 +18,7 @@ export type CSDS3PrivateBucketLogConfig = Pick<
   'targetPrefix'
 >;
 
-export type CDSPrivateS3BucketConfig = Pick<
+export type CDSS3PrivateBucketConfig = Pick<
   S3BucketConfig,
   'bucket' | 'provider' | 'tags'
 > & {
@@ -29,7 +29,7 @@ export type CDSPrivateS3BucketConfig = Pick<
   readonly versioned?: boolean;
 };
 
-export interface CDSPrivateS3ServerSideEncryptionConfig
+export interface CDSS3PrivateServerSideEncryptionConfig
   extends TerraformMetaArguments {
   readonly bucket: string;
   readonly sseAlgorithm?: SSEAlgorithm;
@@ -37,7 +37,7 @@ export interface CDSPrivateS3ServerSideEncryptionConfig
   readonly bucketKeyEnabled?: boolean;
 }
 
-export interface CDSPrivateS3LoggingConfig extends TerraformMetaArguments {
+export interface CDSS3PrivateLoggingConfig extends TerraformMetaArguments {
   readonly bucket: string;
   readonly targetBucket: string;
   readonly targetPrefix?: string;
@@ -51,11 +51,11 @@ export interface CDSPrivateS3LoggingConfig extends TerraformMetaArguments {
  *
  * https://aws.amazon.com/blogs/aws/heads-up-amazon-s3-security-changes-are-coming-in-april-of-2023/
  */
-export class CDSPrivateS3Bucket extends Construct {
+export class CDSS3PrivateBucket extends Construct {
   constructor(
     scope: Construct,
     name: string,
-    config: CDSPrivateS3BucketConfig
+    config: CDSS3PrivateBucketConfig
   ) {
     super(scope, name);
 
@@ -63,7 +63,7 @@ export class CDSPrivateS3Bucket extends Construct {
 
     if (bucket && !checkS3BucketName(bucket)) {
       throw new Error(
-        `${CDSPrivateS3Bucket.name}: '${bucket}' bucket name is invalid.`
+        `${CDSS3PrivateBucket.name}: '${bucket}' bucket name is invalid.`
       );
     }
 
@@ -85,7 +85,7 @@ export class CDSPrivateS3Bucket extends Construct {
     });
   }
 
-  public createBucket(config: CDSPrivateS3BucketConfig): S3Bucket {
+  public createBucket(config: CDSS3PrivateBucketConfig): S3Bucket {
     const {
       bucket,
       tags,
@@ -138,7 +138,7 @@ export class CDSPrivateS3Bucket extends Construct {
     return resource;
   }
 
-  public createLogBucket(config: CDSPrivateS3BucketConfig): S3Bucket {
+  public createLogBucket(config: CDSS3PrivateBucketConfig): S3Bucket {
     const {
       bucket,
       tags,
@@ -182,7 +182,7 @@ export class CDSPrivateS3Bucket extends Construct {
 
   public createServiceSideEncryption(
     name: string,
-    config: CDSPrivateS3ServerSideEncryptionConfig
+    config: CDSS3PrivateServerSideEncryptionConfig
   ) {
     const { bucket, bucketKeyEnabled, provider, sseAlgorithm, kmsMasterKeyId } =
       config;
@@ -208,7 +208,7 @@ export class CDSPrivateS3Bucket extends Construct {
     });
   }
 
-  public createLogging(name: string, config: CDSPrivateS3LoggingConfig) {
+  public createLogging(name: string, config: CDSS3PrivateLoggingConfig) {
     const { bucket, targetBucket, provider, targetPrefix } = config;
     new S3BucketLoggingA(this, name, {
       bucket,
