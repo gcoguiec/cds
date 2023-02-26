@@ -44,10 +44,12 @@ export interface CDSPrivateS3LoggingConfig extends TerraformMetaArguments {
 }
 
 /**
- * Creates a private S3 bucket.
+ * Creates a private and encrypted S3 bucket.
  *
  * This resource blocks public access and log all accesses in a secondary
  * bucket by default.
+ *
+ * https://aws.amazon.com/blogs/aws/heads-up-amazon-s3-security-changes-are-coming-in-april-of-2023/
  */
 export class CDSPrivateS3Bucket extends Construct {
   constructor(
