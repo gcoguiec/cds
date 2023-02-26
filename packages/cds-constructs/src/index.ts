@@ -1,2 +1,4 @@
-export * from './aws/private-s3-bucket';
-export * from './backend/aws-remote-state';
+export * from './aws';
+export * from './aws/s3/s3-policies';
+export * from './aws/s3/s3-private-bucket';
+export * from './aws/s3/s3-public-bucket';

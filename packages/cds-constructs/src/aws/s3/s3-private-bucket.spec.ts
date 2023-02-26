@@ -4,8 +4,8 @@ import { S3BucketServerSideEncryptionConfigurationA } from '@cdktf/provider-aws/
 import { S3BucketVersioningA } from '@cdktf/provider-aws/lib/s3-bucket-versioning';
 import { Testing } from 'cdktf';
 
-import { SSEAlgorithm } from '../aws';
-import { CDSPrivateS3Bucket } from './private-s3-bucket';
+import { SSEAlgorithm } from '..';
+import { CDSPrivateS3Bucket } from './s3-private-bucket';
 
 describe('CDSPrivateS3Bucket', () => {
   let synthetized: string;

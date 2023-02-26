@@ -10,8 +10,8 @@ import type { TerraformMetaArguments } from 'cdktf';
 import { TerraformOutput } from 'cdktf';
 import { Construct } from 'constructs';
 
-import { SSEAlgorithm } from '../aws';
-import { checkS3BucketName } from '../utils/validation';
+import { checkS3BucketName } from '../../utils/validation';
+import { SSEAlgorithm } from '..';
 
 export type CSDS3PrivateBucketLogConfig = Pick<
   S3BucketLoggingAConfig,

@@ -3,7 +3,7 @@
   "author": "Guillaume 'Yugo' Coguiec <mail@gcoguiec.com> (https://github.com/gcoguiec/)",
   "license": "BSD-2-Clause",
   "type": "module",
-  "packageManager": "pnpm@7.27.1",
+  "packageManager": "pnpm@7.28.0",
   "description": "Simplify and streamline stack composition via reusable constructs",
   "keywords": [
     "cdktf",

@@ -1,18 +1,22 @@
 import type { S3BucketConfig } from '@cdktf/provider-aws/lib/s3-bucket';
 import { S3Bucket } from '@cdktf/provider-aws/lib/s3-bucket';
+import { S3BucketAcl } from '@cdktf/provider-aws/lib/s3-bucket-acl';
 import type { S3BucketCorsConfigurationCorsRule } from '@cdktf/provider-aws/lib/s3-bucket-cors-configuration';
 import { S3BucketCorsConfiguration } from '@cdktf/provider-aws/lib/s3-bucket-cors-configuration';
+import { S3BucketPolicy } from '@cdktf/provider-aws/lib/s3-bucket-policy';
 import { S3BucketVersioningA } from '@cdktf/provider-aws/lib/s3-bucket-versioning';
 import { Construct } from 'constructs';
 
-import { checkS3BucketName } from '../utils/validation';
+import { checkS3BucketName } from '../../utils/validation';
+import { createForceHTTPSPolicyDocument } from './s3-policies';
 
 export type CDSPublicS3BucketConfig = Pick<
   S3BucketConfig,
-  'bucket' | 'provider' | 'tags'
+  'bucket' | 'bucketPrefix' | 'forceDestroy' | 'provider' | 'tags'
 > & {
   versioned?: boolean;
   cors?: Array<S3BucketCorsConfigurationCorsRule>;
+  forceTLS?: boolean;
 };
 
 export const defaultCORSRule: S3BucketCorsConfigurationCorsRule = {
@@ -31,7 +35,16 @@ export class CDSPublicS3Bucket extends Construct {
   constructor(scope: Construct, name: string, config: CDSPublicS3BucketConfig) {
     super(scope, name);
 
-    const { bucket, provider, tags, versioned, cors } = config;
+    const {
+      bucket,
+      bucketPrefix,
+      provider,
+      tags,
+      forceDestroy,
+      versioned,
+      cors,
+      forceTLS
+    } = config;
 
     if (bucket && !checkS3BucketName(bucket)) {
       throw new Error(
@@ -41,14 +54,35 @@ export class CDSPublicS3Bucket extends Construct {
 
     const resource = new S3Bucket(this, 'bucket', {
       bucket,
+      bucketPrefix,
+      forceDestroy: forceDestroy ?? true,
       tags,
       provider
     });
 
+    new S3BucketAcl(this, 'acl', {
+      bucket: resource.id,
+      provider,
+      acl: 'public-read'
+    });
+
     new S3BucketCorsConfiguration(this, 'cors', {
       bucket: resource.id,
+      provider,
       corsRule: cors?.length ? cors : [defaultCORSRule]
     });
+
+    if (forceTLS) {
+      const doc = createForceHTTPSPolicyDocument(scope, 'policy_doc', {
+        bucket: resource.bucket
+      });
+
+      new S3BucketPolicy(this, 'policy', {
+        bucket: resource.bucket,
+        policy: doc.json,
+        provider
+      });
+    }
 
     if (versioned) {
       new S3BucketVersioningA(this, 'versioning', {
