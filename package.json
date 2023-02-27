@@ -11,6 +11,6 @@
     "commitlint": "^17.4.4",
     "husky": "^8.0.3",
     "lint-staged": "^13.1.2",
-    "cspell": "^6.26.3"
+    "cspell": "^6.27.0"
   }
 }
