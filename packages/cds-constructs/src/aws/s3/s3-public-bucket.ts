@@ -21,7 +21,7 @@ export type CDSS3PublicBucketConfig = Pick<
 
 export const defaultCORSRule: S3BucketCorsConfigurationCorsRule = {
   allowedHeaders: ['*'],
-  allowedMethods: ['GET', 'HEAD', 'OPTIONS'],
+  allowedMethods: ['GET', 'HEAD'],
   allowedOrigins: ['*'],
   exposeHeaders: [],
   maxAgeSeconds: 3_600

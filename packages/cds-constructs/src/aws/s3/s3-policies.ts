@@ -19,7 +19,7 @@ export function createForceHTTPSPolicyDocument(
     statement: [
       {
         sid: 'ForceTLSRequestsOnly',
-        effect: 'deny',
+        effect: 'Deny',
         actions: ['s3:*'],
         principals: [
           {
@@ -38,7 +38,7 @@ export function createForceHTTPSPolicyDocument(
       },
       {
         sid: 'EnforceTLSv12OrHigher',
-        effect: 'deny',
+        effect: 'Deny',
         actions: ['s3:*'],
         principals: [
           {
