@@ -14,9 +14,9 @@ export type CDSS3PublicBucketConfig = Pick<
   S3BucketConfig,
   'bucket' | 'bucketPrefix' | 'forceDestroy' | 'provider' | 'tags'
 > & {
-  versioned?: boolean;
-  cors?: Array<S3BucketCorsConfigurationCorsRule>;
-  forceTLS?: boolean;
+  readonly versioned?: boolean;
+  readonly cors?: Array<S3BucketCorsConfigurationCorsRule>;
+  readonly forceTLS?: boolean;
 };
 
 export const defaultCORSRule: S3BucketCorsConfigurationCorsRule = {
@@ -73,7 +73,7 @@ export class CDSS3PublicBucket extends Construct {
     });
 
     if (forceTLS) {
-      const doc = createForceHTTPSPolicyDocument(scope, 'policy_doc', {
+      const doc = createForceHTTPSPolicyDocument(this, 'policy_doc', {
         bucket: resource.bucket
       });
 

@@ -3,6 +3,7 @@ import { S3Bucket } from '@cdktf/provider-aws/lib/s3-bucket';
 import { S3BucketAcl } from '@cdktf/provider-aws/lib/s3-bucket-acl';
 import type { S3BucketLoggingAConfig } from '@cdktf/provider-aws/lib/s3-bucket-logging';
 import { S3BucketLoggingA } from '@cdktf/provider-aws/lib/s3-bucket-logging';
+import { S3BucketPolicy } from '@cdktf/provider-aws/lib/s3-bucket-policy';
 import { S3BucketPublicAccessBlock } from '@cdktf/provider-aws/lib/s3-bucket-public-access-block';
 import { S3BucketServerSideEncryptionConfigurationA } from '@cdktf/provider-aws/lib/s3-bucket-server-side-encryption-configuration';
 import { S3BucketVersioningA } from '@cdktf/provider-aws/lib/s3-bucket-versioning';
@@ -12,6 +13,7 @@ import { Construct } from 'constructs';
 
 import { checkS3BucketName } from '../../utils/validation';
 import { SSEAlgorithm } from '..';
+import { createForceObjectEncryptionPolicyDocument } from './s3-policies';
 
 export type CSDS3PrivateBucketLogConfig = Pick<
   S3BucketLoggingAConfig,
@@ -22,11 +24,13 @@ export type CDSS3PrivateBucketConfig = Pick<
   S3BucketConfig,
   'bucket' | 'provider' | 'tags'
 > & {
+  readonly bucketPrefix?: string;
   readonly sseAlgorithm?: SSEAlgorithm;
   readonly kmsMasterKeyId?: string;
   readonly bucketKeyEnabled?: boolean;
   readonly log?: CSDS3PrivateBucketLogConfig;
   readonly versioned?: boolean;
+  readonly preventDestroy?: boolean;
 };
 
 export interface CDSS3PrivateServerSideEncryptionConfig
@@ -88,16 +92,19 @@ export class CDSS3PrivateBucket extends Construct {
   public createBucket(config: CDSS3PrivateBucketConfig): S3Bucket {
     const {
       bucket,
+      bucketPrefix,
       tags,
       provider,
       sseAlgorithm,
       kmsMasterKeyId,
       bucketKeyEnabled,
-      versioned
+      versioned,
+      preventDestroy
     } = config;
 
     const resource = new S3Bucket(this, 'bucket', {
       bucket,
+      bucketPrefix,
       tags,
       provider
     });
@@ -105,7 +112,10 @@ export class CDSS3PrivateBucket extends Construct {
     new S3BucketAcl(this, 'acl', {
       bucket: resource.id,
       provider,
-      acl: 'private'
+      acl: 'private',
+      lifecycle: {
+        preventDestroy
+      }
     });
 
     new S3BucketPublicAccessBlock(this, 'public_access_block', {
@@ -123,6 +133,17 @@ export class CDSS3PrivateBucket extends Construct {
       sseAlgorithm,
       kmsMasterKeyId,
       bucketKeyEnabled
+    });
+
+    const doc = createForceObjectEncryptionPolicyDocument(this, 'policy_doc', {
+      bucket: resource.bucket,
+      sseAlgorithm: sseAlgorithm ?? SSEAlgorithm.AES
+    });
+
+    new S3BucketPolicy(this, 'policy', {
+      bucket: resource.id,
+      policy: doc.json,
+      provider
     });
 
     if (versioned) {
@@ -145,13 +166,17 @@ export class CDSS3PrivateBucket extends Construct {
       provider,
       sseAlgorithm,
       kmsMasterKeyId,
-      bucketKeyEnabled
+      bucketKeyEnabled,
+      preventDestroy
     } = config;
 
     const resource = new S3Bucket(this, 'log_bucket', {
       bucket: bucket ? `${bucket}-logs` : undefined,
       tags,
-      provider
+      provider,
+      lifecycle: {
+        preventDestroy
+      }
     });
 
     new S3BucketAcl(this, 'log_acl', {
