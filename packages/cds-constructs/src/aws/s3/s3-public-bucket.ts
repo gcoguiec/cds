@@ -5,6 +5,7 @@ import type { S3BucketCorsConfigurationCorsRule } from '@cdktf/provider-aws/lib/
 import { S3BucketCorsConfiguration } from '@cdktf/provider-aws/lib/s3-bucket-cors-configuration';
 import { S3BucketPolicy } from '@cdktf/provider-aws/lib/s3-bucket-policy';
 import { S3BucketVersioningA } from '@cdktf/provider-aws/lib/s3-bucket-versioning';
+import { TerraformOutput } from 'cdktf';
 import { Construct } from 'constructs';
 
 import { checkS3BucketName } from '../../utils/validation';
@@ -78,7 +79,7 @@ export class CDSS3PublicBucket extends Construct {
       });
 
       new S3BucketPolicy(this, 'policy', {
-        bucket: resource.bucket,
+        bucket: resource.id,
         policy: doc.json,
         provider
       });
@@ -93,5 +94,9 @@ export class CDSS3PublicBucket extends Construct {
         }
       });
     }
+
+    new TerraformOutput(this, 'bucket_arn', {
+      value: resource.arn
+    });
   }
 }

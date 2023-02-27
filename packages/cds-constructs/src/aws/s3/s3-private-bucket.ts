@@ -81,11 +81,11 @@ export class CDSS3PrivateBucket extends Construct {
       targetPrefix: log?.targetPrefix
     });
 
-    new TerraformOutput(this, 'bucket_name', {
-      value: s3Bucket.bucket
+    new TerraformOutput(this, 'bucket_arn', {
+      value: s3Bucket.arn
     });
-    new TerraformOutput(this, 'log_bucket_name', {
-      value: logBucket.bucket
+    new TerraformOutput(this, 'log_bucket_arn', {
+      value: logBucket.arn
     });
   }
 
