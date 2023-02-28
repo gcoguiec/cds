@@ -1,15 +1,16 @@
 import type { S3BucketConfig } from '@cdktf/provider-aws/lib/s3-bucket';
+import type { S3BucketLoggingAConfig } from '@cdktf/provider-aws/lib/s3-bucket-logging';
+import type { TerraformMetaArguments } from 'cdktf';
+
+import { TerraformOutput } from 'cdktf';
+import { Construct } from 'constructs';
 import { S3Bucket } from '@cdktf/provider-aws/lib/s3-bucket';
 import { S3BucketAcl } from '@cdktf/provider-aws/lib/s3-bucket-acl';
-import type { S3BucketLoggingAConfig } from '@cdktf/provider-aws/lib/s3-bucket-logging';
 import { S3BucketLoggingA } from '@cdktf/provider-aws/lib/s3-bucket-logging';
 import { S3BucketPolicy } from '@cdktf/provider-aws/lib/s3-bucket-policy';
 import { S3BucketPublicAccessBlock } from '@cdktf/provider-aws/lib/s3-bucket-public-access-block';
 import { S3BucketServerSideEncryptionConfigurationA } from '@cdktf/provider-aws/lib/s3-bucket-server-side-encryption-configuration';
 import { S3BucketVersioningA } from '@cdktf/provider-aws/lib/s3-bucket-versioning';
-import type { TerraformMetaArguments } from 'cdktf';
-import { TerraformOutput } from 'cdktf';
-import { Construct } from 'constructs';
 
 import { checkS3BucketName } from '../../utils/validation';
 import { SSEAlgorithm } from '..';

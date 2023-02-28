@@ -1,5 +1,5 @@
-import { DataAwsIamPolicyDocument } from '@cdktf/provider-aws/lib/data-aws-iam-policy-document';
 import { Testing } from 'cdktf';
+import { DataAwsIamPolicyDocument } from '@cdktf/provider-aws/lib/data-aws-iam-policy-document';
 
 import { SSEAlgorithm } from '..';
 import {

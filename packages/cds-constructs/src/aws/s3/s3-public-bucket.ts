@@ -1,12 +1,13 @@
 import type { S3BucketConfig } from '@cdktf/provider-aws/lib/s3-bucket';
+import type { S3BucketCorsConfigurationCorsRule } from '@cdktf/provider-aws/lib/s3-bucket-cors-configuration';
+
+import { TerraformOutput } from 'cdktf';
+import { Construct } from 'constructs';
 import { S3Bucket } from '@cdktf/provider-aws/lib/s3-bucket';
 import { S3BucketAcl } from '@cdktf/provider-aws/lib/s3-bucket-acl';
-import type { S3BucketCorsConfigurationCorsRule } from '@cdktf/provider-aws/lib/s3-bucket-cors-configuration';
 import { S3BucketCorsConfiguration } from '@cdktf/provider-aws/lib/s3-bucket-cors-configuration';
 import { S3BucketPolicy } from '@cdktf/provider-aws/lib/s3-bucket-policy';
 import { S3BucketVersioningA } from '@cdktf/provider-aws/lib/s3-bucket-versioning';
-import { TerraformOutput } from 'cdktf';
-import { Construct } from 'constructs';
 
 import { checkS3BucketName } from '../../utils/validation';
 import { createForceHTTPSPolicyDocument } from './s3-policies';

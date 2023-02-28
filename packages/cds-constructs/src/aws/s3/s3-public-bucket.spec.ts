@@ -1,7 +1,7 @@
+import { Testing } from 'cdktf';
 import { DataAwsIamPolicyDocument } from '@cdktf/provider-aws/lib/data-aws-iam-policy-document';
 import { S3BucketPolicy } from '@cdktf/provider-aws/lib/s3-bucket-policy';
 import { S3BucketVersioningA } from '@cdktf/provider-aws/lib/s3-bucket-versioning';
-import { Testing } from 'cdktf';
 
 import { CDSS3PublicBucket } from './s3-public-bucket';
 

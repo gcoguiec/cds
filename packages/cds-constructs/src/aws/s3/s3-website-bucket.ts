@@ -1,12 +1,15 @@
 import type { S3BucketConfig } from '@cdktf/provider-aws/lib/s3-bucket';
-import { S3Bucket } from '@cdktf/provider-aws/lib/s3-bucket';
-import { S3BucketAcl } from '@cdktf/provider-aws/lib/s3-bucket-acl';
 import type { S3BucketCorsConfigurationCorsRule } from '@cdktf/provider-aws/lib/s3-bucket-cors-configuration';
-import { S3BucketCorsConfiguration } from '@cdktf/provider-aws/lib/s3-bucket-cors-configuration';
-import { S3BucketPolicy } from '@cdktf/provider-aws/lib/s3-bucket-policy';
-import { S3BucketWebsiteConfiguration } from '@cdktf/provider-aws/lib/s3-bucket-website-configuration';
+import type { S3BucketWebsiteConfigurationRoutingRule } from '@cdktf/provider-aws/lib/s3-bucket-website-configuration';
+
 import { TerraformOutput } from 'cdktf';
 import { Construct } from 'constructs';
+import { S3Bucket } from '@cdktf/provider-aws/lib/s3-bucket';
+import { S3BucketAcl } from '@cdktf/provider-aws/lib/s3-bucket-acl';
+import { S3BucketCorsConfiguration } from '@cdktf/provider-aws/lib/s3-bucket-cors-configuration';
+import { S3BucketPolicy } from '@cdktf/provider-aws/lib/s3-bucket-policy';
+import { S3BucketVersioningA } from '@cdktf/provider-aws/lib/s3-bucket-versioning';
+import { S3BucketWebsiteConfiguration } from '@cdktf/provider-aws/lib/s3-bucket-website-configuration';
 
 import { checkS3BucketName } from '../../utils/validation';
 import { createForceHTTPSPolicyDocument } from './s3-policies';
@@ -15,7 +18,9 @@ export type CDSS3WebsiteBucketConfig = Pick<
   S3BucketConfig,
   'bucket' | 'bucketPrefix' | 'forceDestroy' | 'provider' | 'tags'
 > & {
+  readonly versioned?: boolean;
   readonly cors?: Array<S3BucketCorsConfigurationCorsRule>;
+  readonly rules?: Array<S3BucketWebsiteConfigurationRoutingRule>;
 };
 
 export const defaultCORSRule: S3BucketCorsConfigurationCorsRule = {
@@ -28,7 +33,7 @@ export const defaultCORSRule: S3BucketCorsConfigurationCorsRule = {
 
 /**
  * Creates a static website bucket with good defaults, suitable for throwable
- * preview builds.
+ * preview builds or static API documentations.
  */
 export class CDSS3WebsiteBucket extends Construct {
   constructor(
@@ -38,7 +43,16 @@ export class CDSS3WebsiteBucket extends Construct {
   ) {
     super(scope, name);
 
-    const { bucket, bucketPrefix, provider, tags, forceDestroy, cors } = config;
+    const {
+      bucket,
+      bucketPrefix,
+      provider,
+      tags,
+      forceDestroy,
+      cors,
+      rules,
+      versioned
+    } = config;
 
     if (bucket && !checkS3BucketName(bucket)) {
       throw new Error(
@@ -66,10 +80,6 @@ export class CDSS3WebsiteBucket extends Construct {
       corsRule: cors?.length ? cors : [defaultCORSRule]
     });
 
-    const doc = createForceHTTPSPolicyDocument(this, 'policy_doc', {
-      bucket: resource.bucket
-    });
-
     new S3BucketWebsiteConfiguration(this, 'website', {
       bucket: resource.id,
       provider,
@@ -78,7 +88,12 @@ export class CDSS3WebsiteBucket extends Construct {
       },
       indexDocument: {
         suffix: 'index.html'
-      }
+      },
+      routingRule: rules
+    });
+
+    const doc = createForceHTTPSPolicyDocument(this, 'policy_doc', {
+      bucket: resource.bucket
     });
 
     new S3BucketPolicy(this, 'policy', {
@@ -86,6 +101,16 @@ export class CDSS3WebsiteBucket extends Construct {
       policy: doc.json,
       provider
     });
+
+    if (versioned) {
+      new S3BucketVersioningA(this, 'versioning', {
+        bucket: resource.id,
+        provider,
+        versioningConfiguration: {
+          status: 'Enabled'
+        }
+      });
+    }
 
     new TerraformOutput(this, 'bucket_arn', {
       value: resource.arn

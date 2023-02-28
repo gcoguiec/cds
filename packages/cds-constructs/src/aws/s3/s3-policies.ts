@@ -1,9 +1,9 @@
+import type { SSEAlgorithm } from '..';
 import type { DataAwsIamPolicyDocumentStatementPrincipals } from '@cdktf/provider-aws/lib/data-aws-iam-policy-document';
-import { DataAwsIamPolicyDocument } from '@cdktf/provider-aws/lib/data-aws-iam-policy-document';
 import type { TerraformMetaArguments } from 'cdktf';
 import type { Construct } from 'constructs';
 
-import type { SSEAlgorithm } from '..';
+import { DataAwsIamPolicyDocument } from '@cdktf/provider-aws/lib/data-aws-iam-policy-document';
 
 export interface S3PolicyDocumentConfig extends TerraformMetaArguments {
   readonly bucket: string;

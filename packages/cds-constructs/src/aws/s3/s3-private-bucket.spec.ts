@@ -1,8 +1,8 @@
+import { Testing } from 'cdktf';
 import { S3Bucket } from '@cdktf/provider-aws/lib/s3-bucket';
 import { S3BucketLoggingA } from '@cdktf/provider-aws/lib/s3-bucket-logging';
 import { S3BucketServerSideEncryptionConfigurationA } from '@cdktf/provider-aws/lib/s3-bucket-server-side-encryption-configuration';
 import { S3BucketVersioningA } from '@cdktf/provider-aws/lib/s3-bucket-versioning';
-import { Testing } from 'cdktf';
 
 import { SSEAlgorithm } from '..';
 import { CDSS3PrivateBucket } from './s3-private-bucket';
