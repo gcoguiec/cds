@@ -1,5 +1,6 @@
 import type { S3BucketConfig } from '@cdktf/provider-aws/lib/s3-bucket';
 import type { S3BucketCorsConfigurationCorsRule } from '@cdktf/provider-aws/lib/s3-bucket-cors-configuration';
+import type { S3BucketWebsiteConfigurationRoutingRule } from '@cdktf/provider-aws/lib/s3-bucket-website-configuration';
 
 import { TerraformOutput } from 'cdktf';
 import { Construct } from 'constructs';
@@ -8,17 +9,20 @@ import { S3BucketAcl } from '@cdktf/provider-aws/lib/s3-bucket-acl';
 import { S3BucketCorsConfiguration } from '@cdktf/provider-aws/lib/s3-bucket-cors-configuration';
 import { S3BucketPolicy } from '@cdktf/provider-aws/lib/s3-bucket-policy';
 import { S3BucketVersioningA } from '@cdktf/provider-aws/lib/s3-bucket-versioning';
+import { S3BucketWebsiteConfiguration } from '@cdktf/provider-aws/lib/s3-bucket-website-configuration';
 
 import { checkS3BucketName } from '../../utils/validation';
 import { createForceHTTPSPolicyDocument } from './s3-policies';
 
-export type CDSS3PublicBucketConfig = Pick<
+export type CDSS3WebsiteBucketConfig = Pick<
   S3BucketConfig,
   'bucket' | 'bucketPrefix' | 'forceDestroy' | 'provider' | 'tags'
 > & {
   readonly versioned?: boolean;
   readonly cors?: Array<S3BucketCorsConfigurationCorsRule>;
-  readonly forceTLS?: boolean;
+  readonly index?: string;
+  readonly errorIndex?: string;
+  readonly rules?: Array<S3BucketWebsiteConfigurationRoutingRule>;
 };
 
 export const defaultCORSRule: S3BucketCorsConfigurationCorsRule = {
@@ -26,15 +30,19 @@ export const defaultCORSRule: S3BucketCorsConfigurationCorsRule = {
   allowedMethods: ['GET', 'HEAD'],
   allowedOrigins: ['*'],
   exposeHeaders: [],
-  maxAgeSeconds: 3_600
+  maxAgeSeconds: 86_400
 };
 
 /**
- * Creates a read-only public and unencrypted S3 bucket, suitable for hosting
- * static website assets.
+ * Creates a static website bucket with good defaults, suitable for throwable
+ * preview builds or static API documentations.
  */
-export class CDSS3PublicBucket extends Construct {
-  constructor(scope: Construct, name: string, config: CDSS3PublicBucketConfig) {
+export class CDSS3WebsiteBucket extends Construct {
+  constructor(
+    scope: Construct,
+    name: string,
+    config: CDSS3WebsiteBucketConfig
+  ) {
     super(scope, name);
 
     const {
@@ -43,14 +51,16 @@ export class CDSS3PublicBucket extends Construct {
       provider,
       tags,
       forceDestroy,
-      versioned,
       cors,
-      forceTLS
+      index,
+      errorIndex,
+      rules,
+      versioned
     } = config;
 
     if (bucket && !checkS3BucketName(bucket)) {
       throw new Error(
-        `${CDSS3PublicBucket.name}: '${bucket}' bucket name is invalid.`
+        `${CDSS3WebsiteBucket.name}: '${bucket}' bucket name is invalid.`
       );
     }
 
@@ -74,17 +84,27 @@ export class CDSS3PublicBucket extends Construct {
       corsRule: cors?.length ? cors : [defaultCORSRule]
     });
 
-    if (forceTLS) {
-      const doc = createForceHTTPSPolicyDocument(this, 'policy_doc', {
-        bucket: resource.bucket
-      });
+    new S3BucketWebsiteConfiguration(this, 'website', {
+      bucket: resource.id,
+      provider,
+      indexDocument: {
+        suffix: index ?? 'index.html'
+      },
+      errorDocument: {
+        key: errorIndex ?? 'index.html'
+      },
+      routingRule: rules
+    });
 
-      new S3BucketPolicy(this, 'policy', {
-        bucket: resource.id,
-        policy: doc.json,
-        provider
-      });
-    }
+    const doc = createForceHTTPSPolicyDocument(this, 'policy_doc', {
+      bucket: resource.bucket
+    });
+
+    new S3BucketPolicy(this, 'policy', {
+      bucket: resource.id,
+      policy: doc.json,
+      provider
+    });
 
     if (versioned) {
       new S3BucketVersioningA(this, 'versioning', {
