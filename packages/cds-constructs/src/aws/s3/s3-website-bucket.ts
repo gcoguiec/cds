@@ -20,6 +20,8 @@ export type CDSS3WebsiteBucketConfig = Pick<
 > & {
   readonly versioned?: boolean;
   readonly cors?: Array<S3BucketCorsConfigurationCorsRule>;
+  readonly index?: string;
+  readonly errorIndex?: string;
   readonly rules?: Array<S3BucketWebsiteConfigurationRoutingRule>;
 };
 
@@ -50,6 +52,8 @@ export class CDSS3WebsiteBucket extends Construct {
       tags,
       forceDestroy,
       cors,
+      index,
+      errorIndex,
       rules,
       versioned
     } = config;
@@ -83,11 +87,11 @@ export class CDSS3WebsiteBucket extends Construct {
     new S3BucketWebsiteConfiguration(this, 'website', {
       bucket: resource.id,
       provider,
-      errorDocument: {
-        key: 'index.html'
-      },
       indexDocument: {
-        suffix: 'index.html'
+        suffix: index ?? 'index.html'
+      },
+      errorDocument: {
+        key: errorIndex ?? 'index.html'
       },
       routingRule: rules
     });
