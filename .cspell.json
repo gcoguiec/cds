@@ -27,7 +27,7 @@
     "/TS[^\\s]+/",
     "\\(#.+?\\)"
   ],
-  "words": ["gcoguiec", "Guillaume", "Coguiec"],
+  "words": ["gcoguiec", "Guillaume", "Coguiec", "synthetized"],
   "overrides": [
     {
       "filename": "**/*.{ts,js,cjs,mjs}",
