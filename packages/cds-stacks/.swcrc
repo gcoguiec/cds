@@ -1,0 +1,28 @@
+{
+  "jsc": {
+    "baseUrl": ".",
+    "parser": {
+      "syntax": "typescript",
+      "tsx": false,
+      "decorators": false,
+      "dynamicImport": false,
+      "importAssertions": false
+    },
+    "transform": null,
+    "target": "esnext",
+    "externalHelpers": false,
+    "keepClassNames": false,
+    "loose": false,
+    "paths": {
+      "src/": ["./src/"]
+    }
+  },
+  "module": {
+    "type": "commonjs",
+    "strict": true,
+    "strictMode": true,
+    "lazy": false,
+    "noInterop": true
+  },
+  "sourceMaps": "inline"
+}
