@@ -17,12 +17,12 @@ import { checkS3BucketName } from '../../utils/validation';
 import { SSEAlgorithm } from '..';
 import { createForceObjectEncryptionPolicyDocument } from './s3-policies';
 
-export type CSDS3PrivateBucketLogConfig = Pick<
+export type S3PrivateBucketLogConfig = Pick<
   S3BucketLoggingAConfig,
   'targetPrefix'
 >;
 
-export type CDSS3PrivateBucketConfig = Pick<
+export type S3PrivateBucketConfig = Pick<
   S3BucketConfig,
   'bucket' | 'provider' | 'tags'
 > & {
@@ -30,12 +30,12 @@ export type CDSS3PrivateBucketConfig = Pick<
   readonly sseAlgorithm?: SSEAlgorithm;
   readonly kmsMasterKeyId?: string;
   readonly bucketKeyEnabled?: boolean;
-  readonly log?: CSDS3PrivateBucketLogConfig;
+  readonly log?: S3PrivateBucketLogConfig;
   readonly versioned?: boolean;
   readonly preventDestroy?: boolean;
 };
 
-export interface CDSS3PrivateServerSideEncryptionConfig
+export interface S3PrivateServerSideEncryptionConfig
   extends TerraformMetaArguments {
   readonly bucket: string;
   readonly sseAlgorithm?: SSEAlgorithm;
@@ -43,7 +43,7 @@ export interface CDSS3PrivateServerSideEncryptionConfig
   readonly bucketKeyEnabled?: boolean;
 }
 
-export interface CDSS3PrivateLoggingConfig extends TerraformMetaArguments {
+export interface S3PrivateLoggingConfig extends TerraformMetaArguments {
   readonly bucket: string;
   readonly targetBucket: string;
   readonly targetPrefix?: string;
@@ -57,19 +57,15 @@ export interface CDSS3PrivateLoggingConfig extends TerraformMetaArguments {
  *
  * https://aws.amazon.com/blogs/aws/heads-up-amazon-s3-security-changes-are-coming-in-april-of-2023/
  */
-export class CDSS3PrivateBucket extends Construct {
-  constructor(
-    scope: Construct,
-    name: string,
-    config: CDSS3PrivateBucketConfig
-  ) {
+export class S3PrivateBucket extends Construct {
+  constructor(scope: Construct, name: string, config: S3PrivateBucketConfig) {
     super(scope, name);
 
     const { provider, log, bucket } = config;
 
     if (bucket && !checkS3BucketName(bucket)) {
       throw new Error(
-        `${CDSS3PrivateBucket.name}: '${bucket}' bucket name is invalid.`
+        `${S3PrivateBucket.name}: '${bucket}' bucket name is invalid.`
       );
     }
 
@@ -91,7 +87,7 @@ export class CDSS3PrivateBucket extends Construct {
     });
   }
 
-  public createBucket(config: CDSS3PrivateBucketConfig): S3Bucket {
+  public createBucket(config: S3PrivateBucketConfig): S3Bucket {
     const {
       bucket,
       bucketPrefix,
@@ -161,7 +157,7 @@ export class CDSS3PrivateBucket extends Construct {
     return resource;
   }
 
-  public createLogBucket(config: CDSS3PrivateBucketConfig): S3Bucket {
+  public createLogBucket(config: S3PrivateBucketConfig): S3Bucket {
     const {
       bucket,
       tags,
@@ -228,7 +224,7 @@ export class CDSS3PrivateBucket extends Construct {
 
   public createServiceSideEncryption(
     name: string,
-    config: CDSS3PrivateServerSideEncryptionConfig
+    config: S3PrivateServerSideEncryptionConfig
   ) {
     const { bucket, bucketKeyEnabled, provider, sseAlgorithm, kmsMasterKeyId } =
       config;
@@ -240,8 +236,7 @@ export class CDSS3PrivateBucket extends Construct {
         {
           ...(sseAlgorithm === SSEAlgorithm.KMS
             ? {
-                // Bucket key is enabled by default when using KMS.
-                // see: https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-key.html
+                // https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-key.html
                 bucketKeyEnabled: bucketKeyEnabled ?? true
               }
             : {}),
@@ -254,7 +249,7 @@ export class CDSS3PrivateBucket extends Construct {
     });
   }
 
-  public createLogging(name: string, config: CDSS3PrivateLoggingConfig) {
+  public createLogging(name: string, config: S3PrivateLoggingConfig) {
     const { bucket, targetBucket, provider, targetPrefix } = config;
     new S3BucketLoggingA(this, name, {
       bucket,

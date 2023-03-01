@@ -3,9 +3,9 @@ import { DataAwsIamPolicyDocument } from '@cdktf/provider-aws/lib/data-aws-iam-p
 import { S3BucketPolicy } from '@cdktf/provider-aws/lib/s3-bucket-policy';
 import { S3BucketVersioningA } from '@cdktf/provider-aws/lib/s3-bucket-versioning';
 
-import { CDSS3PublicBucket } from './s3-public-bucket';
+import { S3PublicBucket } from './s3-public-bucket';
 
-describe('CDSS3PublicBucket', () => {
+describe('S3PublicBucket', () => {
   let synthetized: string;
 
   describe('when bucket name provided is invalid', () => {
@@ -14,18 +14,18 @@ describe('CDSS3PublicBucket', () => {
     it('throws an error', () => {
       expect(() => {
         Testing.synthScope(scope => {
-          new CDSS3PublicBucket(scope, 'public', {
+          new S3PublicBucket(scope, 'public', {
             bucket
           });
         });
-      }).toThrowError("CDSS3PublicBucket: 'invalid-' bucket name is invalid.");
+      }).toThrowError("S3PublicBucket: 'invalid-' bucket name is invalid.");
     });
   });
 
   describe('when no configuration is provided', () => {
     beforeAll(() => {
       synthetized = Testing.synthScope(scope => {
-        new CDSS3PublicBucket(scope, 'public', {});
+        new S3PublicBucket(scope, 'public', {});
       });
     });
 
@@ -38,7 +38,7 @@ describe('CDSS3PublicBucket', () => {
   describe('when versioned option is enabled', () => {
     beforeAll(() => {
       synthetized = Testing.synthScope(scope => {
-        new CDSS3PublicBucket(scope, 'public', {
+        new S3PublicBucket(scope, 'public', {
           versioned: true
         });
       });
@@ -57,7 +57,7 @@ describe('CDSS3PublicBucket', () => {
   describe('when force TLS option is enabled', () => {
     beforeAll(() => {
       synthetized = Testing.synthScope(scope => {
-        new CDSS3PublicBucket(scope, 'public', {
+        new S3PublicBucket(scope, 'public', {
           forceTLS: true
         });
       });

@@ -12,7 +12,7 @@ import { S3BucketVersioningA } from '@cdktf/provider-aws/lib/s3-bucket-versionin
 import { checkS3BucketName } from '../../utils/validation';
 import { createForceHTTPSPolicyDocument } from './s3-policies';
 
-export type CDSS3PublicBucketConfig = Pick<
+export type S3PublicBucketConfig = Pick<
   S3BucketConfig,
   'bucket' | 'bucketPrefix' | 'forceDestroy' | 'provider' | 'tags'
 > & {
@@ -33,8 +33,8 @@ const defaultCORSRule: S3BucketCorsConfigurationCorsRule = {
  * Creates a read-only public and unencrypted S3 bucket, suitable for hosting
  * static website assets.
  */
-export class CDSS3PublicBucket extends Construct {
-  constructor(scope: Construct, name: string, config: CDSS3PublicBucketConfig) {
+export class S3PublicBucket extends Construct {
+  constructor(scope: Construct, name: string, config: S3PublicBucketConfig) {
     super(scope, name);
 
     const {
@@ -50,7 +50,7 @@ export class CDSS3PublicBucket extends Construct {
 
     if (bucket && !checkS3BucketName(bucket)) {
       throw new Error(
-        `${CDSS3PublicBucket.name}: '${bucket}' bucket name is invalid.`
+        `${S3PublicBucket.name}: '${bucket}' bucket name is invalid.`
       );
     }
 

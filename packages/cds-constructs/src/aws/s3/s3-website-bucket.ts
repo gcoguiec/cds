@@ -14,7 +14,7 @@ import { S3BucketWebsiteConfiguration } from '@cdktf/provider-aws/lib/s3-bucket-
 import { checkS3BucketName } from '../../utils/validation';
 import { createForceHTTPSPolicyDocument } from './s3-policies';
 
-export type CDSS3WebsiteBucketConfig = Pick<
+export type S3WebsiteBucketConfig = Pick<
   S3BucketConfig,
   'bucket' | 'bucketPrefix' | 'forceDestroy' | 'provider' | 'tags'
 > & {
@@ -37,12 +37,8 @@ const defaultCORSRule: S3BucketCorsConfigurationCorsRule = {
  * Creates a static website bucket with good defaults, suitable for throwable
  * preview builds or static API documentations.
  */
-export class CDSS3WebsiteBucket extends Construct {
-  constructor(
-    scope: Construct,
-    name: string,
-    config: CDSS3WebsiteBucketConfig
-  ) {
+export class S3WebsiteBucket extends Construct {
+  constructor(scope: Construct, name: string, config: S3WebsiteBucketConfig) {
     super(scope, name);
 
     const {
@@ -60,7 +56,7 @@ export class CDSS3WebsiteBucket extends Construct {
 
     if (bucket && !checkS3BucketName(bucket)) {
       throw new Error(
-        `${CDSS3WebsiteBucket.name}: '${bucket}' bucket name is invalid.`
+        `${S3WebsiteBucket.name}: '${bucket}' bucket name is invalid.`
       );
     }
 
