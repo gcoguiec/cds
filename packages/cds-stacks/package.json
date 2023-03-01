@@ -1,10 +1,10 @@
 {
-  "name": "@gcoguiec/cds-constructs",
+  "name": "@gcoguiec/cds-stacks",
   "author": "Guillaume 'Yugo' Coguiec <mail@gcoguiec.com> (https://github.com/gcoguiec/)",
   "license": "BSD-2-Clause",
   "type": "module",
   "packageManager": "pnpm@7.28.0",
-  "description": "A bundle of reusable constructs with reasonable defaults",
+  "description": "A bundle of reusable stacks",
   "keywords": [
     "cdktf",
     "cdk8s",
@@ -28,9 +28,10 @@
     "build:watch": "pnpm build --watch",
     "lint": "eslint . --ignore-path .gitignore",
     "lint:fix": "pnpm lint --fix",
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
-    "test:coverage": "pnpm test -- --coverage",
     "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@gcoguiec/cds-constructs": "workspace:*"
   },
   "devDependencies": {
     "@cdktf/provider-aws": "^12.0.6",
