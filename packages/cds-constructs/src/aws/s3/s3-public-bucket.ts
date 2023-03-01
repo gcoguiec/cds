@@ -21,7 +21,7 @@ export type CDSS3PublicBucketConfig = Pick<
   readonly forceTLS?: boolean;
 };
 
-export const defaultCORSRule: S3BucketCorsConfigurationCorsRule = {
+const defaultCORSRule: S3BucketCorsConfigurationCorsRule = {
   allowedHeaders: ['*'],
   allowedMethods: ['GET', 'HEAD'],
   allowedOrigins: ['*'],

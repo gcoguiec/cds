@@ -25,7 +25,7 @@ export type CDSS3WebsiteBucketConfig = Pick<
   readonly rules?: Array<S3BucketWebsiteConfigurationRoutingRule>;
 };
 
-export const defaultCORSRule: S3BucketCorsConfigurationCorsRule = {
+const defaultCORSRule: S3BucketCorsConfigurationCorsRule = {
   allowedHeaders: ['*'],
   allowedMethods: ['GET', 'HEAD'],
   allowedOrigins: ['*'],
