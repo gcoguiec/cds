@@ -6,6 +6,7 @@ import { TerraformOutput } from 'cdktf';
 import { Construct } from 'constructs';
 import { S3Bucket } from '@cdktf/provider-aws/lib/s3-bucket';
 import { S3BucketAcl } from '@cdktf/provider-aws/lib/s3-bucket-acl';
+import { S3BucketLifecycleConfiguration } from '@cdktf/provider-aws/lib/s3-bucket-lifecycle-configuration';
 import { S3BucketLoggingA } from '@cdktf/provider-aws/lib/s3-bucket-logging';
 import { S3BucketPolicy } from '@cdktf/provider-aws/lib/s3-bucket-policy';
 import { S3BucketPublicAccessBlock } from '@cdktf/provider-aws/lib/s3-bucket-public-access-block';
@@ -193,6 +194,25 @@ export class CDSS3PrivateBucket extends Construct {
       blockPublicPolicy: true,
       ignorePublicAcls: true,
       restrictPublicBuckets: true
+    });
+
+    new S3BucketLifecycleConfiguration(this, 'log_lifecycle', {
+      bucket: resource.id,
+      rule: [
+        {
+          id: 'AutoArchive',
+          status: 'Enabled',
+          transition: [
+            {
+              days: 90,
+              storageClass: 'GLACIER'
+            }
+          ],
+          expiration: {
+            days: 365
+          }
+        }
+      ]
     });
 
     this.createServiceSideEncryption('log_sse_encryption', {
