@@ -5,15 +5,15 @@ import { S3BucketServerSideEncryptionConfigurationA } from '@cdktf/provider-aws/
 import { S3BucketVersioningA } from '@cdktf/provider-aws/lib/s3-bucket-versioning';
 
 import { SSEAlgorithm } from '..';
-import { CDSS3PrivateBucket } from './s3-private-bucket';
+import { S3PrivateBucket } from './s3-private-bucket';
 
-describe('CDSS3PrivateBucket', () => {
+describe('S3PrivateBucket', () => {
   let synthetized: string;
 
   describe('when no configuration is provided', () => {
     beforeAll(() => {
       synthetized = Testing.synthScope(scope => {
-        new CDSS3PrivateBucket(scope, 'private', {});
+        new S3PrivateBucket(scope, 'private', {});
       });
     });
 
@@ -47,7 +47,7 @@ describe('CDSS3PrivateBucket', () => {
 
     beforeAll(() => {
       synthetized = Testing.synthScope(scope => {
-        new CDSS3PrivateBucket(scope, 'private', {
+        new S3PrivateBucket(scope, 'private', {
           bucket
         });
       });
@@ -70,18 +70,18 @@ describe('CDSS3PrivateBucket', () => {
     it('throws an error', () => {
       expect(() => {
         Testing.synthScope(scope => {
-          new CDSS3PrivateBucket(scope, 'private', {
+          new S3PrivateBucket(scope, 'private', {
             bucket
           });
         });
-      }).toThrowError("CDSS3PrivateBucket: 'invalid-' bucket name is invalid.");
+      }).toThrowError("S3PrivateBucket: 'invalid-' bucket name is invalid.");
     });
   });
 
   describe('when server-side encryption is set to aws:kms', () => {
     beforeAll(() => {
       synthetized = Testing.synthScope(scope => {
-        new CDSS3PrivateBucket(scope, 'private', {
+        new S3PrivateBucket(scope, 'private', {
           sseAlgorithm: SSEAlgorithm.KMS
         });
       });
@@ -106,7 +106,7 @@ describe('CDSS3PrivateBucket', () => {
 
       beforeAll(() => {
         synthetized = Testing.synthScope(scope => {
-          new CDSS3PrivateBucket(scope, 'private', {
+          new S3PrivateBucket(scope, 'private', {
             sseAlgorithm: SSEAlgorithm.KMS,
             bucketKeyEnabled
           });
@@ -134,7 +134,7 @@ describe('CDSS3PrivateBucket', () => {
 
     beforeAll(() => {
       synthetized = Testing.synthScope(scope => {
-        new CDSS3PrivateBucket(scope, 'private', {
+        new S3PrivateBucket(scope, 'private', {
           log: {
             targetPrefix
           }
@@ -154,7 +154,7 @@ describe('CDSS3PrivateBucket', () => {
   describe('when private bucket is configured with versioning', () => {
     beforeAll(() => {
       synthetized = Testing.synthScope(scope => {
-        new CDSS3PrivateBucket(scope, 'private', {
+        new S3PrivateBucket(scope, 'private', {
           versioned: true
         });
       });

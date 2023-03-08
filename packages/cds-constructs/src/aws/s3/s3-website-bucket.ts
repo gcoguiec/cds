@@ -7,14 +7,13 @@ import { Construct } from 'constructs';
 import { S3Bucket } from '@cdktf/provider-aws/lib/s3-bucket';
 import { S3BucketAcl } from '@cdktf/provider-aws/lib/s3-bucket-acl';
 import { S3BucketCorsConfiguration } from '@cdktf/provider-aws/lib/s3-bucket-cors-configuration';
-import { S3BucketPolicy } from '@cdktf/provider-aws/lib/s3-bucket-policy';
+// import { S3BucketPolicy } from '@cdktf/provider-aws/lib/s3-bucket-policy';
 import { S3BucketVersioningA } from '@cdktf/provider-aws/lib/s3-bucket-versioning';
 import { S3BucketWebsiteConfiguration } from '@cdktf/provider-aws/lib/s3-bucket-website-configuration';
 
-import { checkS3BucketName } from '../../utils/validation';
-import { createForceHTTPSPolicyDocument } from './s3-policies';
+import { checkS3BucketName } from '../validation';
 
-export type CDSS3WebsiteBucketConfig = Pick<
+export type S3WebsiteBucketConfig = Pick<
   S3BucketConfig,
   'bucket' | 'bucketPrefix' | 'forceDestroy' | 'provider' | 'tags'
 > & {
@@ -37,12 +36,8 @@ const defaultCORSRule: S3BucketCorsConfigurationCorsRule = {
  * Creates a static website bucket with good defaults, suitable for throwable
  * preview builds or static API documentations.
  */
-export class CDSS3WebsiteBucket extends Construct {
-  constructor(
-    scope: Construct,
-    name: string,
-    config: CDSS3WebsiteBucketConfig
-  ) {
+export class S3WebsiteBucket extends Construct {
+  constructor(scope: Construct, name: string, config: S3WebsiteBucketConfig) {
     super(scope, name);
 
     const {
@@ -60,7 +55,7 @@ export class CDSS3WebsiteBucket extends Construct {
 
     if (bucket && !checkS3BucketName(bucket)) {
       throw new Error(
-        `${CDSS3WebsiteBucket.name}: '${bucket}' bucket name is invalid.`
+        `${S3WebsiteBucket.name}: '${bucket}' bucket name is invalid.`
       );
     }
 
@@ -96,15 +91,15 @@ export class CDSS3WebsiteBucket extends Construct {
       routingRule: rules
     });
 
-    const doc = createForceHTTPSPolicyDocument(this, 'policy_doc', {
-      bucket: resource.bucket
-    });
+    // const doc = createForceHTTPSPolicyDocument(this, 'policy_doc', {
+    //   bucket: resource.bucket
+    // });
 
-    new S3BucketPolicy(this, 'policy', {
-      bucket: resource.id,
-      policy: doc.json,
-      provider
-    });
+    // new S3BucketPolicy(this, 'policy', {
+    //   bucket: resource.id,
+    //   policy: doc.json,
+    //   provider
+    // });
 
     if (versioned) {
       new S3BucketVersioningA(this, 'versioning', {

@@ -66,13 +66,13 @@ importers:
 
   packages/cds-constructs:
     specifiers:
-      '@cdktf/provider-aws': ^12.0.6
+      '@cdktf/provider-aws': ^0.0.0
       cdktf: ^0.15.5
-      constructs: ^10.1.262
+      constructs: ^10.1.269
     devDependencies:
-      '@cdktf/provider-aws': 12.0.6_67zv72phwoy2pp4rou5ryovteq
-      cdktf: 0.15.5_constructs@10.1.262
-      constructs: 10.1.262
+      '@cdktf/provider-aws': 0.0.0_5dpsrf4oqhkyfjmw6nduwdag2m
+      cdktf: 0.15.5_constructs@10.1.269
+      constructs: 10.1.269
 
   packages/cds-stacks:
     specifiers:
@@ -428,6 +428,17 @@ packages:
 
   /@bcoe/v8-coverage/0.2.3:
     resolution: {integrity: sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==}
+    dev: true
+
+  /@cdktf/provider-aws/0.0.0_5dpsrf4oqhkyfjmw6nduwdag2m:
+    resolution: {integrity: sha512-7ianE/7E8o774uQh2/MP1H3WxihuTR4L0GSM1mMcJfc78d0Xz5NH2WTwJRm0C4q5/i5DwS2dvkpyd1M9SBGQmQ==}
+    engines: {node: '>= 14.17.0'}
+    peerDependencies:
+      cdktf: ^0.15.0
+      constructs: ^10.0.0
+    dependencies:
+      cdktf: 0.15.5_constructs@10.1.269
+      constructs: 10.1.269
     dev: true
 
   /@cdktf/provider-aws/12.0.6_67zv72phwoy2pp4rou5ryovteq:
@@ -2360,6 +2371,21 @@ packages:
       - json-stable-stringify
       - semver
 
+  /cdktf/0.15.5_constructs@10.1.269:
+    resolution: {integrity: sha512-fcamLs7SKz+kTbQFf+fOXDGvmwT5bH4bHwp+jkVKjGTRsu6C8z5oFVAjKYm+aP1tC7sSWG967+ihSx6+uPNAGw==}
+    peerDependencies:
+      constructs: ^10.0.25
+    dependencies:
+      archiver: 5.3.1
+      constructs: 10.1.269
+      json-stable-stringify: 1.0.2
+      semver: 7.3.8
+    dev: true
+    bundledDependencies:
+      - archiver
+      - json-stable-stringify
+      - semver
+
   /chalk/2.4.2:
     resolution: {integrity: sha512-Mti+f9lpJNcwF4tWV8/OrTTtF1gZi+f8FqlyAdouralcFWFQWF2+NgCHShjkCb+IFBLq9buZwE1xckQU4peSuQ==}
     engines: {node: '>=4'}
@@ -2538,6 +2564,11 @@ packages:
 
   /constructs/10.1.262:
     resolution: {integrity: sha512-gVK1wapBFr2PhLz+b45n1WcpG3R7O4zFKyEiJnVLobFxCfmY8Gc3p8qyZZ7E8d6j5HMo9c7oFQmfLA8BVNm27g==}
+    engines: {node: '>= 14.17.0'}
+    dev: true
+
+  /constructs/10.1.269:
+    resolution: {integrity: sha512-oW7iI0kmKJkrUpWwvhrG4Yu0w1V/1UYL1hXNFkzD6Rsr3s3jpwC1YK721nKncY6Vp4ZMWtZVfc/gNXTp1k62zg==}
     engines: {node: '>= 14.17.0'}
     dev: true
 

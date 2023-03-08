@@ -1,122 +1,104 @@
 import type { S3BucketConfig } from '@cdktf/provider-aws/lib/s3-bucket';
-import type { S3BucketLoggingAConfig } from '@cdktf/provider-aws/lib/s3-bucket-logging';
-import type { TerraformMetaArguments } from 'cdktf';
 
-import { TerraformOutput } from 'cdktf';
 import { Construct } from 'constructs';
 import { S3Bucket } from '@cdktf/provider-aws/lib/s3-bucket';
-import { S3BucketAcl } from '@cdktf/provider-aws/lib/s3-bucket-acl';
-import { S3BucketLifecycleConfiguration } from '@cdktf/provider-aws/lib/s3-bucket-lifecycle-configuration';
+import {
+  S3BucketLifecycleConfiguration,
+  S3BucketLifecycleConfigurationRule
+} from '@cdktf/provider-aws/lib/s3-bucket-lifecycle-configuration';
 import { S3BucketLoggingA } from '@cdktf/provider-aws/lib/s3-bucket-logging';
-import { S3BucketPolicy } from '@cdktf/provider-aws/lib/s3-bucket-policy';
 import { S3BucketPublicAccessBlock } from '@cdktf/provider-aws/lib/s3-bucket-public-access-block';
 import { S3BucketServerSideEncryptionConfigurationA } from '@cdktf/provider-aws/lib/s3-bucket-server-side-encryption-configuration';
 import { S3BucketVersioningA } from '@cdktf/provider-aws/lib/s3-bucket-versioning';
 
-import { checkS3BucketName } from '../../utils/validation';
+import { checkS3BucketName } from '../validation';
 import { SSEAlgorithm } from '..';
-import { createForceObjectEncryptionPolicyDocument } from './s3-policies';
+import { S3BucketOwnershipControls } from '@cdktf/provider-aws/lib/s3-bucket-ownership-controls';
+import { S3BucketPolicy } from '@cdktf/provider-aws/lib/s3-bucket-policy';
+import { DataAwsIamPolicyDocument } from '@cdktf/provider-aws/lib/data-aws-iam-policy-document';
+import {
+  createCreateDenyBucketKeylessUploadsStatement,
+  createDenyIncorrectEncryptionHeaderStatement,
+  createDenyUnencryptedObjectUploadsStatement,
+  createEnforceTLSv12OrHigherStatement,
+  createForceTLSRequestsOnlyStatement
+} from './s3-policies';
+import { S3LogBucket } from './s3-log-bucket';
+import type { TerraformMetaArguments } from 'cdktf';
 
-export type CSDS3PrivateBucketLogConfig = Pick<
-  S3BucketLoggingAConfig,
-  'targetPrefix'
->;
-
-export type CDSS3PrivateBucketConfig = Pick<
-  S3BucketConfig,
-  'bucket' | 'provider' | 'tags'
-> & {
-  readonly bucketPrefix?: string;
-  readonly sseAlgorithm?: SSEAlgorithm;
-  readonly kmsMasterKeyId?: string;
-  readonly bucketKeyEnabled?: boolean;
-  readonly log?: CSDS3PrivateBucketLogConfig;
-  readonly versioned?: boolean;
-  readonly preventDestroy?: boolean;
-};
-
-export interface CDSS3PrivateServerSideEncryptionConfig
-  extends TerraformMetaArguments {
-  readonly bucket: string;
-  readonly sseAlgorithm?: SSEAlgorithm;
-  readonly kmsMasterKeyId?: string;
-  readonly bucketKeyEnabled?: boolean;
+export interface S3PrivateBucketLogConfig {
+  readonly logPrefix?: string;
 }
 
-export interface CDSS3PrivateLoggingConfig extends TerraformMetaArguments {
-  readonly bucket: string;
-  readonly targetBucket: string;
-  readonly targetPrefix?: string;
-}
+export type S3PrivateBucketConfig = Pick<S3BucketConfig, 'bucket' | 'tags'> &
+  TerraformMetaArguments & {
+    readonly bucketPrefix?: string;
+    readonly sseAlgorithm?: SSEAlgorithm;
+    readonly kmsMasterKeyId?: string;
+    readonly bucketKeyEnabled?: boolean;
+    readonly log?: S3PrivateBucketLogConfig;
+    readonly versioned?: boolean;
+    readonly lifecycleRules?: S3BucketLifecycleConfigurationRule[];
+    readonly preventDestroy?: boolean;
+  };
 
 /**
  * Creates a private and encrypted S3 bucket.
  *
- * This resource blocks public access and log all accesses in a secondary
- * bucket by default.
- *
- * https://aws.amazon.com/blogs/aws/heads-up-amazon-s3-security-changes-are-coming-in-april-of-2023/
+ * This resource blocks public access, log all accesses in a secondary
+ * bucket by default and doesn't use ACLs.
  */
-export class CDSS3PrivateBucket extends Construct {
-  constructor(
-    scope: Construct,
-    name: string,
-    config: CDSS3PrivateBucketConfig
-  ) {
+export class S3PrivateBucket extends Construct {
+  readonly #config: S3PrivateBucketConfig;
+
+  constructor(scope: Construct, name: string, config: S3PrivateBucketConfig) {
     super(scope, name);
 
-    const { provider, log, bucket } = config;
+    this.#config = config;
+    const { provider, bucket, tags, preventDestroy } = config;
+    const logPrefix = config.log?.logPrefix ?? '/logs';
 
     if (bucket && !checkS3BucketName(bucket)) {
       throw new Error(
-        `${CDSS3PrivateBucket.name}: '${bucket}' bucket name is invalid.`
+        `${S3PrivateBucket.name}: '${bucket}' bucket name is invalid.`
       );
     }
 
-    const s3Bucket = this.createBucket(config);
-    const logBucket = this.createLogBucket(config);
-
-    this.createLogging('logging', {
-      bucket: s3Bucket.id,
-      targetBucket: logBucket.id,
+    const s3Bucket = this.createBucket();
+    const logBucket = new S3LogBucket(this, 'log', {
+      bucket: bucket ? `${bucket}-logs` : undefined,
       provider,
-      targetPrefix: log?.targetPrefix
+      tags,
+      logPrefix,
+      preventDestroy
     });
-
-    new TerraformOutput(this, 'bucket_arn', {
-      value: s3Bucket.arn
-    });
-    new TerraformOutput(this, 'log_bucket_arn', {
-      value: logBucket.arn
+    new S3BucketLoggingA(this, name, {
+      bucket: s3Bucket.id,
+      provider,
+      targetBucket: logBucket.id,
+      targetPrefix: logPrefix
     });
   }
 
-  public createBucket(config: CDSS3PrivateBucketConfig): S3Bucket {
-    const {
-      bucket,
-      bucketPrefix,
-      tags,
-      provider,
-      sseAlgorithm,
-      kmsMasterKeyId,
-      bucketKeyEnabled,
-      versioned,
-      preventDestroy
-    } = config;
+  public createBucket(): S3Bucket {
+    const { bucket, bucketPrefix, tags, provider, versioned, preventDestroy } =
+      this.#config;
 
     const resource = new S3Bucket(this, 'bucket', {
       bucket,
       bucketPrefix,
       tags,
-      provider
+      provider,
+      lifecycle: {
+        preventDestroy: preventDestroy ?? false
+      }
     });
 
-    new S3BucketAcl(this, 'acl', {
+    new S3BucketOwnershipControls(this, 'ownership_controls', {
       bucket: resource.id,
       provider,
-      acl: 'private',
-      lifecycle: {
-        preventDestroy
+      rule: {
+        objectOwnership: 'BucketOwnerEnforced'
       }
     });
 
@@ -129,17 +111,73 @@ export class CDSS3PrivateBucket extends Construct {
       restrictPublicBuckets: true
     });
 
-    this.createServiceSideEncryption('sse_encryption', {
+    this.setupLifecycle(resource);
+    this.setupEncryption(resource);
+    this.setupPolicy(resource);
+
+    if (versioned) {
+      this.setupVersioning(resource);
+    }
+
+    return resource;
+  }
+
+  /**
+   * Configure lifecycle on the bucket.
+   *
+   * Version retention is set to one year by default.
+   *
+   * You can override the default lifecycle via the `lifecycleRules`
+   * configuration variable.
+   */
+  private setupLifecycle(resource: S3Bucket) {
+    const { provider, versioned, lifecycleRules } = this.#config;
+    new S3BucketLifecycleConfiguration(this, 'lifecycle', {
       bucket: resource.id,
       provider,
-      sseAlgorithm,
-      kmsMasterKeyId,
-      bucketKeyEnabled
+      rule:
+        lifecycleRules ?? versioned
+          ? [
+              {
+                id: 'AutoArchiveVersions',
+                status: 'Enabled',
+                noncurrentVersionTransition: [
+                  {
+                    noncurrentDays: 7,
+                    storageClass: 'GLACIER'
+                  }
+                ],
+                noncurrentVersionExpiration: {
+                  noncurrentDays: 365
+                }
+              }
+            ]
+          : []
     });
+  }
 
-    const doc = createForceObjectEncryptionPolicyDocument(this, 'policy_doc', {
-      bucket: resource.bucket,
-      sseAlgorithm: sseAlgorithm ?? SSEAlgorithm.AES
+  private setupPolicy(resource: S3Bucket) {
+    const { provider } = this.#config;
+    const sseAlgorithm = this.#config.sseAlgorithm ?? SSEAlgorithm.AES;
+    const bucketKeyEnabled =
+      this.#config.bucketKeyEnabled ?? sseAlgorithm === SSEAlgorithm.KMS;
+    const statement = [
+      createForceTLSRequestsOnlyStatement(resource.arn),
+      createEnforceTLSv12OrHigherStatement(resource.arn),
+      createDenyIncorrectEncryptionHeaderStatement(resource.arn, sseAlgorithm),
+      createDenyUnencryptedObjectUploadsStatement(resource.arn)
+    ];
+
+    if (sseAlgorithm === SSEAlgorithm.KMS && bucketKeyEnabled) {
+      statement.push(
+        createCreateDenyBucketKeylessUploadsStatement(resource.arn)
+      );
+    }
+
+    const doc = new DataAwsIamPolicyDocument(this, 'policy_doc', {
+      provider,
+      version: '2012-10-17',
+      statement
     });
 
     new S3BucketPolicy(this, 'policy', {
@@ -147,101 +185,39 @@ export class CDSS3PrivateBucket extends Construct {
       policy: doc.json,
       provider
     });
-
-    if (versioned) {
-      new S3BucketVersioningA(this, 'versioning', {
-        bucket: resource.id,
-        provider,
-        versioningConfiguration: {
-          status: 'Enabled'
-        }
-      });
-    }
-
-    return resource;
   }
 
-  public createLogBucket(config: CDSS3PrivateBucketConfig): S3Bucket {
-    const {
-      bucket,
-      tags,
+  private setupVersioning(resource: S3Bucket) {
+    const { provider } = this.#config;
+    new S3BucketVersioningA(this, 'versioning', {
+      bucket: resource.id,
       provider,
-      sseAlgorithm,
-      kmsMasterKeyId,
-      bucketKeyEnabled,
-      preventDestroy
-    } = config;
-
-    const resource = new S3Bucket(this, 'log_bucket', {
-      bucket: bucket ? `${bucket}-logs` : undefined,
-      tags,
-      provider,
-      lifecycle: {
-        preventDestroy
+      versioningConfiguration: {
+        status: 'Enabled'
       }
     });
-
-    new S3BucketAcl(this, 'log_acl', {
-      bucket: resource.id,
-      provider,
-      acl: 'log-delivery-write'
-    });
-
-    new S3BucketPublicAccessBlock(this, 'log_public_access_block', {
-      bucket: resource.id,
-      provider,
-      blockPublicAcls: true,
-      blockPublicPolicy: true,
-      ignorePublicAcls: true,
-      restrictPublicBuckets: true
-    });
-
-    new S3BucketLifecycleConfiguration(this, 'log_lifecycle', {
-      bucket: resource.id,
-      rule: [
-        {
-          id: 'AutoArchive',
-          status: 'Enabled',
-          transition: [
-            {
-              days: 90,
-              storageClass: 'GLACIER'
-            }
-          ],
-          expiration: {
-            days: 365
-          }
-        }
-      ]
-    });
-
-    this.createServiceSideEncryption('log_sse_encryption', {
-      bucket: resource.id,
-      provider,
-      sseAlgorithm,
-      kmsMasterKeyId,
-      bucketKeyEnabled
-    });
-
-    return resource;
   }
 
-  public createServiceSideEncryption(
-    name: string,
-    config: CDSS3PrivateServerSideEncryptionConfig
-  ) {
-    const { bucket, bucketKeyEnabled, provider, sseAlgorithm, kmsMasterKeyId } =
-      config;
-
-    new S3BucketServerSideEncryptionConfigurationA(this, name, {
-      bucket,
+  /**
+   * Set-up encryption on the bucket.
+   *
+   * Bucket key will be enabled by default if you're using a KMS master key
+   * (cost saving), you'll have to set `bucketKeyEnabled` to false
+   * if you want to disable it.
+   *
+   * More about the bucket key feature at:
+   * https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-key.html
+   */
+  private setupEncryption(resource: S3Bucket) {
+    const { provider, sseAlgorithm, bucketKeyEnabled, kmsMasterKeyId } =
+      this.#config;
+    new S3BucketServerSideEncryptionConfigurationA(this, 'sse_encryption', {
+      bucket: resource.id,
       provider,
       rule: [
         {
           ...(sseAlgorithm === SSEAlgorithm.KMS
             ? {
-                // Bucket key is enabled by default when using KMS.
-                // see: https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-key.html
                 bucketKeyEnabled: bucketKeyEnabled ?? true
               }
             : {}),
@@ -251,16 +227,6 @@ export class CDSS3PrivateBucket extends Construct {
           }
         }
       ]
-    });
-  }
-
-  public createLogging(name: string, config: CDSS3PrivateLoggingConfig) {
-    const { bucket, targetBucket, provider, targetPrefix } = config;
-    new S3BucketLoggingA(this, name, {
-      bucket,
-      provider,
-      targetBucket,
-      targetPrefix: targetPrefix ?? 'logs'
     });
   }
 }

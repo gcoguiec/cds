@@ -4,8 +4,11 @@ _default:
 build:
   @pnpm -r build
 
+build-watch:
+  @pnpm -r build:watch
+
 prettier *args:
-  pnpm prettier {{args}} "**/*.{js,cjs,mjs,ts,cts,mts,json,md}"
+  @pnpm prettier {{args}} "**/*.{js,cjs,mjs,ts,cts,mts,json,md}"
 
 fmt:
   @just prettier --write

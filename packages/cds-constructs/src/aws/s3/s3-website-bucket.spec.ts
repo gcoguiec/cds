@@ -3,9 +3,9 @@ import { DataAwsIamPolicyDocument } from '@cdktf/provider-aws/lib/data-aws-iam-p
 import { S3BucketPolicy } from '@cdktf/provider-aws/lib/s3-bucket-policy';
 import { S3BucketVersioningA } from '@cdktf/provider-aws/lib/s3-bucket-versioning';
 
-import { CDSS3WebsiteBucket } from './s3-website-bucket';
+import { S3WebsiteBucket } from './s3-website-bucket';
 
-describe('CDSS3WebsiteBucket', () => {
+describe('S3WebsiteBucket', () => {
   let synthetized: string;
 
   describe('when bucket name provided is invalid', () => {
@@ -14,18 +14,18 @@ describe('CDSS3WebsiteBucket', () => {
     it('throws an error', () => {
       expect(() => {
         Testing.synthScope(scope => {
-          new CDSS3WebsiteBucket(scope, 'website', {
+          new S3WebsiteBucket(scope, 'website', {
             bucket
           });
         });
-      }).toThrowError("CDSS3WebsiteBucket: 'invalid-' bucket name is invalid.");
+      }).toThrowError("S3WebsiteBucket: 'invalid-' bucket name is invalid.");
     });
   });
 
   describe('when no configuration is provided', () => {
     beforeAll(() => {
       synthetized = Testing.synthScope(scope => {
-        new CDSS3WebsiteBucket(scope, 'website', {});
+        new S3WebsiteBucket(scope, 'website', {});
       });
     });
 
@@ -54,7 +54,7 @@ describe('CDSS3WebsiteBucket', () => {
   describe('when versioned option is enabled', () => {
     beforeAll(() => {
       synthetized = Testing.synthScope(scope => {
-        new CDSS3WebsiteBucket(scope, 'website', {
+        new S3WebsiteBucket(scope, 'website', {
           versioned: true
         });
       });
