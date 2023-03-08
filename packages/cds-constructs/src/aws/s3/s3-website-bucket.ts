@@ -7,12 +7,11 @@ import { Construct } from 'constructs';
 import { S3Bucket } from '@cdktf/provider-aws/lib/s3-bucket';
 import { S3BucketAcl } from '@cdktf/provider-aws/lib/s3-bucket-acl';
 import { S3BucketCorsConfiguration } from '@cdktf/provider-aws/lib/s3-bucket-cors-configuration';
-import { S3BucketPolicy } from '@cdktf/provider-aws/lib/s3-bucket-policy';
+// import { S3BucketPolicy } from '@cdktf/provider-aws/lib/s3-bucket-policy';
 import { S3BucketVersioningA } from '@cdktf/provider-aws/lib/s3-bucket-versioning';
 import { S3BucketWebsiteConfiguration } from '@cdktf/provider-aws/lib/s3-bucket-website-configuration';
 
-import { checkS3BucketName } from '../../utils/validation';
-import { createForceHTTPSPolicyDocument } from './s3-policies';
+import { checkS3BucketName } from '../validation';
 
 export type S3WebsiteBucketConfig = Pick<
   S3BucketConfig,
@@ -92,15 +91,15 @@ export class S3WebsiteBucket extends Construct {
       routingRule: rules
     });
 
-    const doc = createForceHTTPSPolicyDocument(this, 'policy_doc', {
-      bucket: resource.bucket
-    });
+    // const doc = createForceHTTPSPolicyDocument(this, 'policy_doc', {
+    //   bucket: resource.bucket
+    // });
 
-    new S3BucketPolicy(this, 'policy', {
-      bucket: resource.id,
-      policy: doc.json,
-      provider
-    });
+    // new S3BucketPolicy(this, 'policy', {
+    //   bucket: resource.id,
+    //   policy: doc.json,
+    //   provider
+    // });
 
     if (versioned) {
       new S3BucketVersioningA(this, 'versioning', {

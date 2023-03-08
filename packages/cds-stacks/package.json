@@ -3,7 +3,7 @@
   "author": "Guillaume 'Yugo' Coguiec <mail@gcoguiec.com> (https://github.com/gcoguiec/)",
   "license": "BSD-2-Clause",
   "type": "module",
-  "packageManager": "pnpm@7.28.0",
+  "packageManager": "pnpm@7.29.1",
   "description": "A bundle of reusable stacks",
   "keywords": [
     "cdktf",
